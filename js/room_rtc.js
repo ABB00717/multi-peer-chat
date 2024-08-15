@@ -20,6 +20,9 @@ if (!roomId) {
 let localTracks = [];
 let remoteUsers = {};
 
+let localScreenTracks;
+let sharingScreen = false;
+
 let joinRoomInit = async () => {
   client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
   await client.join(APP_ID, roomId, token, uid);
@@ -117,7 +120,25 @@ let toggelMic = async (event) => {
   }
 };
 
+let toggleScreen = async (event) => {
+  let screenButton = event.currentTarget;
+  let cameraButton = document.getElementById('camera-btn');
+
+  if (!sharingScreen) {
+    sharingScreen = true;
+
+    screenButton.classList.add('active');
+    cameraButton.classList.remove('active');
+    cameraButton.style.display = 'none';
+  } else {
+    sharingScreen = false;
+    screenButton.classList.remove('active');
+    cameraButton.style.display = 'block';
+  }
+};
+
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.getElementById('mic-btn').addEventListener('click', toggelMic);
+document.getElementById('screen-btn').addEventListener('click', toggleScreen);
 
 joinRoomInit();
