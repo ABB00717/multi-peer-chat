@@ -62,9 +62,10 @@ let handleUserPublished = async (user, mediaType) => {
     document.getElementById(`user-container-${user.uid}`).addEventListener('click', expandVideoFrame);
   }
 
-  if (displayFrame.style.display === 'block') {
-    player.style.height = '100px';
-    player.style.width = '100px';
+  if (displayFrame.style.display) {
+    let videoFrames = document.getElementById(`user-container-${user.uid}`);
+    videoFrames.style.height = '100px';
+    videoFrames.style.width = '100px';
   }
 
   if (mediaType === 'video') {
