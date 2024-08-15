@@ -130,6 +130,21 @@ let toggleScreen = async (event) => {
     screenButton.classList.add('active');
     cameraButton.classList.remove('active');
     cameraButton.style.display = 'none';
+
+    localScreenTracks = await AgoraRTC.createScreenVideoTrack();
+
+    document.getElementById(`user-container-${uid}`).remove();
+    displayFrame.style.display = 'block';
+
+    player = `<div class="video__container" id="user-container-${uid}">
+                <div class="video-player" id="user-${uid}"></div>
+              </div>`;
+
+    displayFrame.insertAdjacentHTML('beforeend', player);
+    document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
+
+    userIdDisplayFrame = `user-container-${uid}`;
+    localScreenTracks.play(`user-${uid}`);
   } else {
     sharingScreen = false;
     screenButton.classList.remove('active');
