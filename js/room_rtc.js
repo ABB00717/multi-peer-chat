@@ -56,7 +56,7 @@ let handleUserPublished = async (user, mediaType) => {
                   </div>`;
                   
     document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
-    document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
+    document.getElementById(`user-container-${user.uid}`).addEventListener('click', expandVideoFrame);
   }
 
   if (mediaType === 'video') {
