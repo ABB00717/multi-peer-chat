@@ -45,6 +45,16 @@ let expandVideoFrame = (event) => {
   displayFrame.style.display = 'block';
   displayFrame.appendChild(event.currentTarget);
   userIdDisplayFrame = event.currentTarget.id;
+  
+  for (let i = 0; videoFrames.length > i; i++) {
+    if (videoFrames[i].id !== userIdDisplayFrame) {
+      videoFrames[i].style.height = '100px';
+      videoFrames[i].style.width = '100px';  
+    } 
+    
+    videoFrames[i].style.height = '100px';
+    videoFrames[i].style.width = '100px';
+  }
 };
 
 for (let i = 0; videoFrames.length > i; i++) {
