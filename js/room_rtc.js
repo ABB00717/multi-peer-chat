@@ -7,7 +7,7 @@ if (!uid) {
 }
 
 let token = null;
-let client;
+let rtcClient;
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -29,11 +29,11 @@ let localScreenTracks;
 let sharingScreen = false;
 
 let joinRoomInit = async () => {
-  client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-  await client.join(APP_ID, roomId, token, uid);
+  rtcClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+  await rtcClient.join(APP_ID, roomId, token, uid);
 
-  client.on("user-published", handleUserPublished);
-  client.on("user-left", handleUserLeft);
+  rtcClient.on("user-published", handleUserPublished);
+  rtcClient.on("user-left", handleUserLeft);
 
   joinStream();
 };
@@ -53,7 +53,7 @@ let joinStream = async () => {
   document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
 
   localTracks[1].play(`user-${uid}`);
-  await client.publish([localTracks[0], localTracks[1]]);
+  await rtcClient.publish([localTracks[0], localTracks[1]]);
 };
 
 let switchToCamera = async () => {
@@ -70,13 +70,13 @@ let switchToCamera = async () => {
   document.getElementById('screen-btn').classList.remove('active');
 
   localTracks[1].play(`user-${uid}`);
-  await client.publish([localTracks[1]]);
+  await rtcClient.publish([localTracks[1]]);
 };
 
 let handleUserPublished = async (user, mediaType) => {
   remoteUsers[user.uid] = user;
 
-  await client.subscribe(user, mediaType);
+  await rtcClient.subscribe(user, mediaType);
 
   let player = document.getElementById(`user-container-${user.uid}`);
   if (player == null) {
@@ -169,8 +169,8 @@ let toggleScreen = async (event) => {
     userIdDisplayFrame = `user-container-${uid}`;
     localScreenTracks.play(`user-${uid}`);
 
-    await client.unpublish([localTracks[1]]);
-    await client.publish([localScreenTracks]);
+    await rtcClient.unpublish([localTracks[1]]);
+    await rtcClient.publish([localScreenTracks]);
 
     let videoFrames = document.getElementsByClassName('video__container');
     for (let i = 0; videoFrames.length > i; i++) {
@@ -185,7 +185,7 @@ let toggleScreen = async (event) => {
     cameraButton.style.display = 'block';
     document.getElementById(`user-container-${uid}`).remove();
 
-    await client.unpublish([localScreenTracks]);
+    await rtcClient.unpublish([localScreenTracks]);
     switchToCamera();
   }
 };
@@ -195,3 +195,4 @@ document.getElementById('mic-btn').addEventListener('click', toggelMic);
 document.getElementById('screen-btn').addEventListener('click', toggleScreen);
 
 joinRoomInit();
+ 
