@@ -43,9 +43,41 @@ let getMembers = async () => {
   }
 };
 
+let handleChannelMessage = async (messageData, memberId) => {
+  console.log('Channel message:', messageData);
+
+  let data = JSON.parse(messageData.text);
+  console.log('message', data);
+};
+
+let sendMessage = async (event) => {
+  event.preventDefault();
+
+  let message = event.target.message.value;
+  channel.sendMessage({ text: JSON.stringify({ 'type':'chat', 'message':message, 'displayName':displayName }) });
+  addMessageToDom(displayName, message);
+
+  event.target.reset();
+};
+
+let addMessageToDom = (name, message) => {
+  let messagesWrapper = document.getElementById('messages');
+
+  let newMessage = `<div class="message__wrapper">
+                      <div class="message__body">
+                        <strong class="message__author">${name}</strong>
+                        <p class="message__text">${message}</p>
+                      </div>
+                    </div>`
+
+  messagesWrapper.insertAdjacentHTML('beforeend', newMessage);
+};
+
 let leaveChannel = async () => {
   await channel.leave();
   await rtmClient.logout();
 };
 
 window.addEventListener('beforeunload', leaveChannel);
+let messageForm = document.getElementById('message__form');
+messageForm.addEventListener('submit', sendMessage);
