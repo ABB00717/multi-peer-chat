@@ -46,6 +46,7 @@ let joinRoomInit = async () => {
   channel.on('ChannelMessage', handleChannelMessage);
 
   getMembers();
+  addBotMessageToDom(`Welcome to the room, ${displayName}!`);
 
   rtcClient.on('user-published', handleUserPublished);
   rtcClient.on('user-left', handleUserLeft);
