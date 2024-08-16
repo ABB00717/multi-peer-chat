@@ -40,6 +40,9 @@ let joinRoomInit = async () => {
   await channel.join();
 
   channel.on('MemberJoined', handleMemberJoined);
+  channel.on('MemberLeft', handleMemberLeft);
+
+  getMembers();
 
   rtcClient.on('user-published', handleUserPublished);
   rtcClient.on('user-left', handleUserLeft);

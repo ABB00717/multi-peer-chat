@@ -12,3 +12,27 @@ let addMemberToDom = async (memberId) => {
 
   membersWrapper.insertAdjacentHTML('beforeend', memberItem);
 };
+
+let handleMemberLeft = async (memberId) => {
+  removeMemberFromDom(memberId);
+};
+
+let removeMemberFromDom = async (memberId) => {
+  let memberWrapper = document.getElementById(`member__${memberId}__wrapper`);
+  memberWrapper.remove();
+};
+
+let getMembers = async () => {
+  let members = await channel.getMembers();
+
+  for (let i = 0; i < members.length; i++) {
+    addMemberToDom(members[i]);
+  }
+};
+
+let leaveChannel = async () => {
+  await channel.leave();
+  await rtmClient.logout();
+};
+
+window.addEventListener('beforeunload', leaveChannel);
