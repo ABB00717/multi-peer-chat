@@ -17,6 +17,11 @@ if (!roomId) {
   roomId = "main";
 }
 
+let displayName = sessionStorage.getItem("display_name");
+if (!displayName) {
+  window.location = "lobby.html";
+}
+
 let localTracks = [];
 let remoteUsers = {};
 
@@ -38,6 +43,7 @@ let joinStream = async () => {
     width: { min: 640, ideal: 1920, max: 1920 },
     height: { min: 480, ideal: 1080, max: 1080 },
   }});
+  
 
   let player = `<div class="video__container" id="user-container-${uid}">
                   <div class="video-player" id="user-${uid}"></div>
