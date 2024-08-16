@@ -4,10 +4,11 @@ let handleMemberJoined = async (memberId) => {
 };
 
 let addMemberToDom = async (memberId) => {
+  let { name } = await rtmClient.getUserAttributesByKeys(memberId, ['name']);
   let membersWrapper = document.getElementById(`member__list`);
   let memberItem = `<div class="member__wrapper" id="member__${memberId}__wrapper">
                       <span class="green__icon"></span>
-                      <p class="member_name">${memberId}</p>
+                      <p class="member_name">${name}</p>
                     </div>`;
 
   membersWrapper.insertAdjacentHTML('beforeend', memberItem);

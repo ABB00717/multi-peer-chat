@@ -33,6 +33,8 @@ let sharingScreen = false;
 let joinRoomInit = async () => {
   rtmClient = await AgoraRTM.createInstance(APP_ID);
   await rtmClient.login({ uid, token });
+  await rtmClient.addOrUpdateLocalUserAttributes({ 'name': displayName });
+
   rtcClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
   await rtcClient.join(APP_ID, roomId, token, uid);
 
