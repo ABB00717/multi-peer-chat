@@ -3,7 +3,9 @@ let handleMemberJoined = async (memberId) => {
   addMemberToDom(memberId);
 
   let members = await channel.getMembers();
+  let { name } = await rtmClient.getUserAttributesByKeys(memberId, ['name']);
   updateMemberTotal(members);
+  addBotMessageToDom(`Member joined: ${name}`);
 };
 
 let addMemberToDom = async (memberId) => {
