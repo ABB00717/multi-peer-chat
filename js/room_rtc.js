@@ -1,4 +1,4 @@
-const APP_ID = "16839e233420496e9da8fb63e0ec4056";
+const APP_ID = "5b1665699089493d8ff2c629d1bf0c0a";
 
 let uid = sessionStorage.getItem("uid");
 if (!uid) {
@@ -197,7 +197,6 @@ let toggleScreen = async (event) => {
     }
   } else {
     sharingScreen = false;
-    screenButton.classList.remove('active');
     cameraButton.style.display = 'block';
     document.getElementById(`user-container-${uid}`).remove();
 
@@ -206,9 +205,14 @@ let toggleScreen = async (event) => {
   }
 };
 
+let leaveStream = async () => {
+  window.location = "lobby.html";
+};
+
 document.getElementById('camera-btn').addEventListener('click', toggleCamera);
 document.getElementById('mic-btn').addEventListener('click', toggelMic);
 document.getElementById('screen-btn').addEventListener('click', toggleScreen);
+document.getElementById('leave-btn').addEventListener('click', leaveStream);
 
 joinRoomInit();
  
