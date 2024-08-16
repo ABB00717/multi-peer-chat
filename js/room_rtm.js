@@ -45,9 +45,11 @@ let getMembers = async () => {
 
 let handleChannelMessage = async (messageData, memberId) => {
   console.log('Channel message:', messageData);
-
   let data = JSON.parse(messageData.text);
-  console.log('message', data);
+
+  if (data.type === 'chat') {
+    addMessageToDom(data.displayName, data.message);
+  }
 };
 
 let sendMessage = async (event) => {
