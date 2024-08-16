@@ -8,6 +8,8 @@ if (!uid) {
 
 let token = null;
 let rtcClient;
+let rtmClient;
+let channel;
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
@@ -29,11 +31,18 @@ let localScreenTracks;
 let sharingScreen = false;
 
 let joinRoomInit = async () => {
+  rtmClient = await AgoraRTM.createInstance(APP_ID);
+  await rtmClient.login({ uid, token });
   rtcClient = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
   await rtcClient.join(APP_ID, roomId, token, uid);
 
-  rtcClient.on("user-published", handleUserPublished);
-  rtcClient.on("user-left", handleUserLeft);
+  channel = await rtmClient.createChannel(roomId);
+  await channel.join();
+
+  channel.on('MemberJoined', handleMemberJoined);
+
+  rtcClient.on('user-published', handleUserPublished);
+  rtcClient.on('user-left', handleUserLeft);
 
   joinStream();
 };
