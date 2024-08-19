@@ -1,5 +1,3 @@
-const APP_ID = "16839e233420496e9da8fb63e0ec4056";
-
 let uid = sessionStorage.getItem("uid");
 if (!uid) {
   uid = String(Math.floor(Math.random() * 100000));
@@ -7,7 +5,6 @@ if (!uid) {
 }
 var socket = io();
 
-let token = null;
 let client;
 
 const queryString = window.location.search;
