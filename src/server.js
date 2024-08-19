@@ -46,7 +46,7 @@ io.on('connection', (socket) => {
     
     socket.leave(roomId);
     roomMembers[roomId] = roomMembers[roomId].filter(id => id !== socket.id);
-    io.to(roomId).emit('MemberLeft', socket.id);
+    io.to(roomId).emit('memberLeft', socket.id);
 
     console.log(`User ${socket.id} left room ${roomId}`);
   });

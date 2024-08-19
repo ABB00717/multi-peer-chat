@@ -32,13 +32,23 @@ let constraints = {
 }
 
 let localStream;
+let remoteStream;
 let remoteUsers = {};
+let peerConnection;
 
 let joinRoomInit = async () => {
   socket.emit('join', roomId);
 
+  socket.on('memberJoined', handleUserJoined);
+  socket.on('memberLeft', handleMemberLeft);
+  socket.on('messageFromPeer', handleMessageFromPeer);
+
   joinStream();
-};
+};  
+
+let handleUserJoined = async () => {};
+
+let handleMessageFromPeer = async () => {};
 
 let joinStream = async () => {
   localStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -73,6 +83,11 @@ let handleUserPublished = async (user, mediaType) => {
   if (mediaType === 'audio') {
     user.audioTrack.play();
   }
+};
+
+let handleMemberLeft = async (uid) => {
+  console.log('User left:', memberId);
+  document.getElementById(`user-container-${uid}`).remove();
 };
 
 let handleUserLeft = async (user) => {
