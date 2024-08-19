@@ -31,19 +31,23 @@ let constraints = {
   audio: true
 }
 
+let localInitialized = false;
 let localStream;
 let remoteStream;
 let remoteUsers = {};
 let peerConnection;
 
 let joinRoomInit = async () => {
+  if (!localInitialized) {
+    await joinStream();
+    localInitialized = true;
+  }
+  
   socket.emit('join', roomId);
 
   socket.on('memberJoined', handleUserJoined);
   socket.on('memberLeft', handleMemberLeft);
   socket.on('messageFromPeer', handleMessageFromPeer);
-
-  await joinStream();
 };  
 
 let addIceCandidate = async (candidate) => {
@@ -59,8 +63,9 @@ let addAnswer = async (answer) => {
 }
 
 let createPeerConnection = async (memberId) => {
-  if (!localStream) {
+  if (!localInitialized) {
     await joinStream();
+    localInitialized = true;
   }
 
   peerConnection = new RTCPeerConnection(servers);
@@ -134,6 +139,9 @@ let handleMessageFromPeer = async (message, memberId) => {
 };
 
 let joinStream = async () => {
+  if (localInitialized)
+    return;
+
   localStream = await navigator.mediaDevices.getUserMedia(constraints);
 
   let player = `<div class="video__container" id="user-container-${socket.id}">
@@ -145,37 +153,9 @@ let joinStream = async () => {
   videoPlayer.srcObject = localStream;
 };
 
-let handleUserPublished = async (user, mediaType) => {
-  remoteUsers[user.uid] = user;
-
-  await client.subscribe(user, mediaType);
-
-  let player = document.getElementById(`user-container-${user.uid}`);
-  if (player == null) {
-    player = `<div class="video__container" id="user-container-${user.uid}">
-                <div class="video-player" id="user-${user.uid}"></div>
-              </div>`;
-                  
-    document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
-  }
-
-  if (mediaType === 'video') {
-    user.videoTrack.play(`user-${user.uid}`);
-  }
-
-  if (mediaType === 'audio') {
-    user.audioTrack.play();
-  }
-};
-
-let handleMemberLeft = async (uid) => {
+let handleMemberLeft = async (memberId) => {
   console.log('User left:', memberId);
-  document.getElementById(`user-container-${uid}`).remove();
-};
-
-let handleUserLeft = async (user) => {
-  delete remoteUsers[user.uid];
-  document.getElementById(`user-container-${user.uid}`).remove();
+  document.getElementById(`user-container-${memberId}`).remove();
 };
 
 joinRoomInit();
