@@ -14,8 +14,21 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/room.html');
 });
 
+let roomMembers = {};
+
 io.on('connection', (socket) => {
-  console.log('a user connected'); 
+  socket.on('join', (roomId) => {
+    if (!roomMembers[roomId]) {
+      roomMembers[roomId] = [];
+    } else {
+      io.to(roomId).emit('MemberJoined', socket.id);
+    }
+    
+    socket.join(roomId);
+    roomMembers[roomId].push(socket.id);
+    console.log(`User ${socket.id} joined room ${roomId}`);
+    console.log(`Room members: ${roomMembers[roomId]}`);
+  });
 });
 
 server.listen(port, () => {

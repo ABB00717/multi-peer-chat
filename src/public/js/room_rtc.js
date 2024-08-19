@@ -5,6 +5,7 @@ if (!uid) {
   uid = String(Math.floor(Math.random() * 100000));
   sessionStorage.setItem("uid", uid);
 }
+var socket = io();
 
 let token = null;
 let client;
@@ -17,30 +18,41 @@ if (!roomId) {
   roomId = "main";
 }
 
-let localTracks = [];
+const servers = {
+  iceServers: [
+    {
+      urls: ['stun:stun2.l.google.com:19302', 'stun:stun1.l.google.com:19302']
+    }
+  ]
+}
+
+let constraints = {
+  video: {
+    width: { min: 640, ideal: 1280, max: 1920 },
+    height: { min: 400, ideal: 720, max: 1080 }
+  },
+  audio: true
+}
+
+let localStream;
 let remoteUsers = {};
 
 let joinRoomInit = async () => {
-  client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
-  await client.join(APP_ID, roomId, token, uid);
-
-  client.on("user-published", handleUserPublished);
-  client.on("user-left", handleUserLeft);
+  socket.emit('join', roomId);
 
   joinStream();
 };
 
 let joinStream = async () => {
-  localTracks = await AgoraRTC.createMicrophoneAndCameraTracks();
+  localStream = await navigator.mediaDevices.getUserMedia(constraints);
 
   let player = `<div class="video__container" id="user-container-${uid}">
-                  <div class="video-player" id="user-${uid}"></div>
+                  <video class="video-player" id="user-${uid}" autoplay playsinline></video>
                 </div>`;
   
   document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
-
-  localTracks[1].play(`user-${uid}`);
-  await client.publish([localTracks[0], localTracks[1]]);
+  let videoPlayer = document.getElementById(`user-${uid}`);
+  videoPlayer.srcObject = localStream;
 };
 
 let handleUserPublished = async (user, mediaType) => {
