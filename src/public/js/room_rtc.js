@@ -46,12 +46,12 @@ let joinRoomInit = async () => {
 let joinStream = async () => {
   localStream = await navigator.mediaDevices.getUserMedia(constraints);
 
-  let player = `<div class="video__container" id="user-container-${uid}">
-                  <video class="video-player" id="user-${uid}" autoplay playsinline></video>
+  let player = `<div class="video__container" id="user-container-${socket.id}">
+                  <video class="video-player" id="user-${socket.id}" autoplay playsinline></video>
                 </div>`;
   
   document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
-  let videoPlayer = document.getElementById(`user-${uid}`);
+  let videoPlayer = document.getElementById(`user-${socket.id}`);
   videoPlayer.srcObject = localStream;
 };
 

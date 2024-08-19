@@ -50,3 +50,9 @@ let expandVideoFrame = (event) => {
 for (let i = 0; videoFrames.length > i; i++) {
   videoFrames[i].addEventListener('click', expandVideoFrame);
 }
+
+let leaveChannel = () => {
+  socket.emit('leave', roomId);
+};
+
+window.addEventListener('beforeunload', leaveChannel);

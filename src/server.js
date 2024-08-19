@@ -21,13 +21,38 @@ io.on('connection', (socket) => {
     if (!roomMembers[roomId]) {
       roomMembers[roomId] = [];
     } else {
-      io.to(roomId).emit('MemberJoined', socket.id);
+      io.to(roomId).emit('memberJoined', socket.id);
     }
     
     socket.join(roomId);
     roomMembers[roomId].push(socket.id);
     console.log(`User ${socket.id} joined room ${roomId}`);
     console.log(`Room members: ${roomMembers[roomId]}`);
+  });
+
+  socket.on('messageFromPeer', (message, roomId) => {
+    io.to(roomId).emit('messageFromPeer', message, socket.id);
+  });
+
+  socket.on('leave', (roomId) => {
+    if (!roomMembers[roomId]) {
+      return;
+    }
+    
+    const member = roomMembers[roomId].find(id => id === socket.id);
+    if (!member) {
+      return;
+    }
+    
+    socket.leave(roomId);
+    roomMembers[roomId] = roomMembers[roomId].filter(id => id !== socket.id);
+    io.to(roomId).emit('MemberLeft', socket.id);
+
+    console.log(`User ${socket.id} left room ${roomId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
   });
 });
 
