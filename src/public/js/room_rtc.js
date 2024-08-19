@@ -51,8 +51,8 @@ let handleUserPublished = async (user, mediaType) => {
   let player = document.getElementById(`user-container-${user.uid}`);
   if (player == null) {
     player = `<div class="video__container" id="user-container-${user.uid}">
-                    <div class="video-player" id="user-${user.uid}"></div>
-                  </div>`;
+                <div class="video-player" id="user-${user.uid}"></div>
+              </div>`;
                   
     document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
   }
