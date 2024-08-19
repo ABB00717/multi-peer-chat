@@ -43,12 +43,95 @@ let joinRoomInit = async () => {
   socket.on('memberLeft', handleMemberLeft);
   socket.on('messageFromPeer', handleMessageFromPeer);
 
-  joinStream();
+  await joinStream();
 };  
 
-let handleUserJoined = async () => {};
+let addIceCandidate = async (candidate) => {
+  if (peerConnection) {
+    await peerConnection.addIceCandidate(candidate);
+  }
+}
 
-let handleMessageFromPeer = async () => {};
+let addAnswer = async (answer) => {
+  if (!peerConnection.currentRemoteDescription) {
+    await peerConnection.setRemoteDescription(answer);
+  }
+}
+
+let createPeerConnection = async (memberId) => {
+  if (!localStream) {
+    await joinStream();
+  }
+
+  peerConnection = new RTCPeerConnection(servers);
+
+  remoteStream = new MediaStream();
+  let player = `<div class="video__container" id="user-container-${memberId}">
+                  <video class="video-player" id="user-${memberId}" autoplay playsinline></video>
+                </div>`;
+  document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
+  let videoPlayer = document.getElementById(`user-${memberId}`);
+  videoPlayer.srcObject = remoteStream;
+
+  localStream.getTracks().forEach(track => 
+    peerConnection.addTrack(track, localStream)
+  );
+  
+  peerConnection.ontrack = (event) => {
+    event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+  };
+
+  peerConnection.onicecandidate = async (event) => {
+    if (event.candidate) {
+      socket.emit('messageFromPeer', JSON.stringify({'type': 'candidate', 'candidate': event.candidate}), memberId);
+    }
+  };
+}
+
+let createAnswer = async (memberId, offer) => {
+  await createPeerConnection(memberId);
+
+  await peerConnection.setRemoteDescription(offer);
+
+  let answer = await peerConnection.createAnswer();
+  peerConnection.setLocalDescription(answer);
+
+  socket.emit('messageFromPeer', JSON.stringify({'type': 'answer', 'answer': answer}), memberId);
+}
+
+let createOffer = async (memberId) => {
+  await createPeerConnection(memberId);
+
+  let offer = await peerConnection.createOffer();
+  await peerConnection.setLocalDescription(offer);
+
+  socket.emit('messageFromPeer', JSON.stringify({'type': 'offer', 'offer': offer}), memberId);
+}
+
+let handleUserJoined = async (memberId) => {
+  console.log('User joined:', memberId);
+  createOffer(memberId);
+};
+
+let handleMessageFromPeer = async (message, memberId) => {
+  try {
+    message = JSON.parse(message);
+    if (message.type === 'offer') {
+      createAnswer(memberId, message.offer);
+    } 
+    
+    if (message.type === 'answer') {
+      addAnswer(message.answer);
+    }
+    
+    if (message.type === 'candidate') {
+      if (peerConnection)
+        addIceCandidate(message.candidate);
+    }
+  } catch (error) {
+    console.error('Error parsing message:', error);
+  }  
+};
 
 let joinStream = async () => {
   localStream = await navigator.mediaDevices.getUserMedia(constraints);
