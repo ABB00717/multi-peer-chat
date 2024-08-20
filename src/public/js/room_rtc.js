@@ -180,4 +180,33 @@ let handleMemberLeft = async (memberId) => {
   }
 };
 
+let toggleCamera = async (event) => {
+  let button = event.currentTarget;
+  let videoTrack = localStream.getTracks().find(track => track.kind === 'video');
+  
+  if (videoTrack.enabled) {
+    videoTrack.enabled = false;
+    button.classList.remove('active');
+  } else {
+    videoTrack.enabled = true;
+    button.classList.add('active');
+  }
+}
+
+let toggleMic = async (event) => {
+  let button = event.currentTarget;
+  let audioTrack = localStream.getTracks().find(track => track.kind === 'audio');
+  
+  if (audioTrack.enabled) {
+    audioTrack.enabled = false;
+    button.classList.remove('active');
+  } else {
+    audioTrack.enabled = true;
+    button.classList.add('active');
+  }
+}
+
+document.getElementById('camera-btn').addEventListener('click', toggleCamera);
+document.getElementById('mic-btn').addEventListener('click', toggleMic);
+
 joinRoomInit();
