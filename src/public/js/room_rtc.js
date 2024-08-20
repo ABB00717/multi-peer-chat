@@ -5,8 +5,6 @@ if (!uid) {
 }
 var socket = io();
 
-let client;
-
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 let roomId = urlParams.get("room");
@@ -33,9 +31,8 @@ let constraints = {
 
 let localInitialized = false;
 let localStream;
-let remoteStream;
-let remoteUsers = {};
-let peerConnection;
+let remoteStreams = {};
+let peerConnections = {};
 
 let joinRoomInit = async () => {
   if (!localInitialized) {
@@ -50,43 +47,32 @@ let joinRoomInit = async () => {
   socket.on('messageFromPeer', handleMessageFromPeer);
 };  
 
-let addIceCandidate = async (candidate) => {
-  if (peerConnection) {
-    await peerConnection.addIceCandidate(candidate);
-  }
-}
-
-let addAnswer = async (answer) => {
-  if (!peerConnection.currentRemoteDescription) {
-    await peerConnection.setRemoteDescription(answer);
-  }
-}
-
 let createPeerConnection = async (memberId) => {
   if (!localInitialized) {
     await joinStream();
     localInitialized = true;
   }
 
-  peerConnection = new RTCPeerConnection(servers);
+  let peerConnection = new RTCPeerConnection(servers);
+  peerConnections[memberId] = peerConnection;
 
-  remoteStream = new MediaStream();
+  remoteStreams[memberId] = new MediaStream();
   let player = `<div class="video__container" id="user-container-${memberId}">
                   <video class="video-player" id="user-${memberId}" autoplay playsinline></video>
                 </div>`;
   document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
   let videoPlayer = document.getElementById(`user-${memberId}`);
-  videoPlayer.srcObject = remoteStream;
+  videoPlayer.srcObject = remoteStreams[memberId];
 
   localStream.getTracks().forEach(track => 
-    peerConnection.addTrack(track, localStream)
+    peerConnections[memberId].addTrack(track, localStream)
   );
   
-  peerConnection.ontrack = (event) => {
-    event.streams[0].getTracks().forEach(track => remoteStream.addTrack(track));
+  peerConnections[memberId].ontrack = (event) => {
+    event.streams[0].getTracks().forEach(track => remoteStreams[memberId].addTrack(track));
   };
 
-  peerConnection.onicecandidate = async (event) => {
+  peerConnections[memberId].onicecandidate = async (event) => {
     if (event.candidate) {
       socket.emit('messageFromPeer', JSON.stringify({'type': 'candidate', 'candidate': event.candidate}), memberId);
     }
@@ -96,10 +82,10 @@ let createPeerConnection = async (memberId) => {
 let createAnswer = async (memberId, offer) => {
   await createPeerConnection(memberId);
 
-  await peerConnection.setRemoteDescription(offer);
+  await peerConnections[memberId].setRemoteDescription(offer);
 
-  let answer = await peerConnection.createAnswer();
-  peerConnection.setLocalDescription(answer);
+  let answer = await peerConnections[memberId].createAnswer();
+  peerConnections[memberId].setLocalDescription(answer);
 
   socket.emit('messageFromPeer', JSON.stringify({'type': 'answer', 'answer': answer}), memberId);
 }
@@ -107,8 +93,8 @@ let createAnswer = async (memberId, offer) => {
 let createOffer = async (memberId) => {
   await createPeerConnection(memberId);
 
-  let offer = await peerConnection.createOffer();
-  await peerConnection.setLocalDescription(offer);
+  let offer = await peerConnections[memberId].createOffer();
+  await peerConnections[memberId].setLocalDescription(offer);
 
   socket.emit('messageFromPeer', JSON.stringify({'type': 'offer', 'offer': offer}), memberId);
 }
@@ -126,12 +112,12 @@ let handleMessageFromPeer = async (message, memberId) => {
     } 
     
     if (message.type === 'answer') {
-      addAnswer(message.answer);
+      addAnswer(message.answer, memberId);
     }
     
     if (message.type === 'candidate') {
-      if (peerConnection)
-        addIceCandidate(message.candidate);
+      if (peerConnections[memberId])
+        addIceCandidate(message.candidate, memberId);
     }
   } catch (error) {
     console.error('Error parsing message:', error);
@@ -152,6 +138,18 @@ let joinStream = async () => {
   let videoPlayer = document.getElementById(`user-${socket.id}`);
   videoPlayer.srcObject = localStream;
 };
+
+let addAnswer = async (answer, memberId) => {
+  if (!peerConnections[memberId].currentRemoteDescription) {
+    await peerConnections[memberId].setRemoteDescription(answer);
+  }
+}
+
+let addIceCandidate = async (candidate, memberId) => {
+  if (peerConnections[memberId]) {
+    await peerConnections[memberId].addIceCandidate(candidate);
+  }
+}
 
 let handleMemberLeft = async (memberId) => {
   console.log('User left:', memberId);
