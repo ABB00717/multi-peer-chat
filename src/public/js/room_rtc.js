@@ -77,7 +77,7 @@ let createPeerConnection = async (memberId) => {
       socket.emit('messageFromPeer', JSON.stringify({'type': 'candidate', 'candidate': event.candidate}), memberId);
     }
   };
-}
+};
 
 let createAnswer = async (memberId, offer) => {
   await createPeerConnection(memberId);
@@ -88,7 +88,7 @@ let createAnswer = async (memberId, offer) => {
   peerConnections[memberId].setLocalDescription(answer);
 
   socket.emit('messageFromPeer', JSON.stringify({'type': 'answer', 'answer': answer}), memberId);
-}
+};
 
 let createOffer = async (memberId) => {
   await createPeerConnection(memberId);
@@ -97,7 +97,7 @@ let createOffer = async (memberId) => {
   await peerConnections[memberId].setLocalDescription(offer);
 
   socket.emit('messageFromPeer', JSON.stringify({'type': 'offer', 'offer': offer}), memberId);
-}
+};
 
 let handleUserJoined = async (memberId) => {
   console.log('User joined:', memberId);
@@ -135,6 +135,8 @@ let joinStream = async () => {
                 </div>`;
   
   document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
+  document.getElementById(`user-container-${socket.id}`).addEventListener('click', expandVideoFrame);
+
   let videoPlayer = document.getElementById(`user-${socket.id}`);
   videoPlayer.srcObject = localStream;
 };
@@ -143,13 +145,13 @@ let addAnswer = async (answer, memberId) => {
   if (!peerConnections[memberId].currentRemoteDescription) {
     await peerConnections[memberId].setRemoteDescription(answer);
   }
-}
+};
 
 let addIceCandidate = async (candidate, memberId) => {
   if (peerConnections[memberId]) {
     await peerConnections[memberId].addIceCandidate(candidate);
   }
-}
+};
 
 let handleMemberLeft = async (memberId) => {
   console.log('User left:', memberId);
