@@ -36,7 +36,6 @@ let videoFrames = document.getElementsByClassName('video__container');
 let userIdDisplayFrame = null;
 
 let expandVideoFrame = (event) => {
-
   let child = displayFrame.children[0];
   if (child) {
     document.getElementById('streams__container').appendChild(child);

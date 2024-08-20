@@ -57,12 +57,22 @@ let createPeerConnection = async (memberId) => {
   peerConnections[memberId] = peerConnection;
 
   remoteStreams[memberId] = new MediaStream();
-  let player = `<div class="video__container" id="user-container-${memberId}">
-                  <video class="video-player" id="user-${memberId}" autoplay playsinline></video>
-                </div>`;
-  document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
-  let videoPlayer = document.getElementById(`user-${memberId}`);
-  videoPlayer.srcObject = remoteStreams[memberId];
+  let player = document.getElementById(`user-container-${memberId}`); 
+  if (player === null) {
+    player = `<div class="video__container" id="user-container-${memberId}">
+                <video class="video-player" id="user-${memberId}" autoplay playsinline></video>
+              </div>`;
+              
+    document.getElementById('streams__container').insertAdjacentHTML('beforeend', player);
+    document.getElementById(`user-container-${memberId}`).addEventListener('click', expandVideoFrame);
+    let videoPlayer = document.getElementById(`user-${memberId}`);
+    videoPlayer.srcObject = remoteStreams[memberId];
+  }
+            
+  if (displayFrame.style.display) {
+    document.getElementById(`user-container-${memberId}`).style.height = '100px';
+    document.getElementById(`user-container-${memberId}`).style.width = '100px';
+  }
 
   localStream.getTracks().forEach(track => 
     peerConnections[memberId].addTrack(track, localStream)
@@ -155,7 +165,19 @@ let addIceCandidate = async (candidate, memberId) => {
 
 let handleMemberLeft = async (memberId) => {
   console.log('User left:', memberId);
+  delete peerConnections[memberId];
+  delete remoteStreams[memberId];
   document.getElementById(`user-container-${memberId}`).remove();
+
+  if (userIdDisplayFrame === `user-container-${memberId}`) {
+    displayFrame.style.display = null;
+
+    let videoFrames = document.getElementsByClassName('video__container');
+    for (let i = 0; videoFrames.length > i; i++) {
+      videoFrames[i].style.height = '300px';
+      videoFrames[i].style.width = '300px';
+    }
+  }
 };
 
 joinRoomInit();
