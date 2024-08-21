@@ -151,10 +151,14 @@ let handleMessageFromPeer = async (message, memberId) => {
     if (message.type === 'answer') {
       addAnswer(message.answer, memberId);
     }
-    ;
+    
     if (message.type === 'candidate') {
       if (peerConnections[memberId])
         addIceCandidate(message.candidate, memberId);
+    }
+
+    if (message.type === 'chat' || message.type === 'bot') {
+      addChannelMessage(JSON.stringify(message));
     }
   } catch (error) {
     console.error('Error parsing message:', error);
