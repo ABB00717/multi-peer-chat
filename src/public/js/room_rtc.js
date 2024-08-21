@@ -8,6 +8,11 @@ var socket = io();
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 let roomId = urlParams.get("room");
+let displayName = sessionStorage.getItem("display_name");
+
+if (!displayName) {
+  window.location = "lobby.html";
+}
 
 if (!roomId) {
   roomId = "main";
