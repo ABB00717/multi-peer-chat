@@ -45,7 +45,7 @@ let joinRoomInit = async () => {
     localInitialized = true;
   }
 
-  socket.emit('join', roomId);
+  socket.emit('join', roomId, displayName);
 
   socket.on('memberJoined', handleMemberJoined);
   socket.on('memberLeft', handleMemberLeft);
@@ -116,10 +116,11 @@ let createOffer = async (memberId) => {
   socket.emit('messageFromPeer', JSON.stringify({'type': 'offer', 'offer': offer}), memberId);
 };
 
-let handleMemberJoined = async (memberId) => {
-  console.log('Member joined:', memberId);
-  handleMemberJoinedChannel(memberId);
-  createOffer(memberId);
+let handleMemberJoined = async (member) => {
+  member = JSON.parse(member);
+  console.log('Member joined:', member.id);
+  handleMemberJoinedChannel(member);
+  createOffer(member.id);
 };
 
 let handleMemberLeft = async (memberId) => {
@@ -150,7 +151,7 @@ let handleMessageFromPeer = async (message, memberId) => {
     if (message.type === 'answer') {
       addAnswer(message.answer, memberId);
     }
-    
+    ;
     if (message.type === 'candidate') {
       if (peerConnections[memberId])
         addIceCandidate(message.candidate, memberId);

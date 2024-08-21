@@ -1,17 +1,17 @@
-let handleMemberJoinedChannel = async (memberId) => {
-  console.log('A new member joined:', memberId)
-  addMemberToDom(memberId)
+let handleMemberJoinedChannel = async (member) => {
+  console.log('A new member joined:', member.id)
+  addMemberToDom(member)
 }
 
 let handleMemberLeftChannel = async (memberId) => {
   removeMemberFromDom(memberId)
 }
 
-let addMemberToDom = async (memberId) => {
+let addMemberToDom = async (member) => {
   let membersWrapper = document.getElementById('member__list')
-  let memberItem = `<div class="member__wrapper" id="member__${memberId}__wrapper">
+  let memberItem = `<div class="member__wrapper" id="member__${member.id}__wrapper">
                       <span class="green__icon"></span>
-                      <p class="member_name">${memberId}</p>
+                      <p class="member_name">${member.name}</p>
                     </div>`
 
   membersWrapper.insertAdjacentHTML('beforeend', memberItem)

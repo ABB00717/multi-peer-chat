@@ -17,15 +17,15 @@ app.get('/', (req, res) => {
 let roomMembers = {};
 
 io.on('connection', (socket) => {
-  socket.on('join', (roomId) => {
+  socket.on('join', (roomId, displayName) => {
     if (!roomMembers[roomId]) {
       roomMembers[roomId] = [];
     } else {
-      io.to(roomId).emit('memberJoined', socket.id);
+      io.to(roomId).emit('memberJoined', JSON.stringify({ name: displayName, id: socket.id }));
     }
     
     socket.join(roomId);
-    roomMembers[roomId].push(socket.id);
+    roomMembers[roomId].push({ id: socket.id, name: displayName });
     console.log(`User ${socket.id} joined room ${roomId}`);
     console.log(`Room members: ${roomMembers[roomId]}`);
   });
@@ -43,13 +43,13 @@ io.on('connection', (socket) => {
       return;
     }
     
-    const member = roomMembers[roomId].find(id => id === socket.id);
+    const member = roomMembers[roomId].find(member => member.id === socket.id);
     if (!member) {
       return;
     }
     
     socket.leave(roomId);
-    roomMembers[roomId] = roomMembers[roomId].filter(id => id !== socket.id);
+    roomMembers[roomId] = roomMembers[roomId].filter(member => member.id !== socket.id);
     io.to(roomId).emit('memberLeft', socket.id);
 
     console.log(`User ${socket.id} left room ${roomId}`);
