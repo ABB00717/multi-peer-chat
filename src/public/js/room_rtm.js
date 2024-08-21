@@ -1,10 +1,16 @@
 let handleMemberJoinedChannel = async (member) => {
   console.log('A new member joined:', member.id)
   addMemberToDom(member)
+
+  let members = await socket.emitWithAck('getMembers', roomId)
+  updateMemberTotal(members)
 }
 
 let handleMemberLeftChannel = async (memberId) => {
   removeMemberFromDom(memberId)
+
+  let members = await socket.emitWithAck('getMembers', roomId)
+  updateMemberTotal(members)
 }
 
 let addMemberToDom = async (member) => {
@@ -22,8 +28,14 @@ let removeMemberFromDom = async (memberId) => {
   memberWrapper.remove()
 }
 
+let updateMemberTotal = async (members) => {
+  let total = document.getElementById('members__count')
+  total.innerText = members.length
+}
+
 let getMembers = async () => {
   let members = await socket.emitWithAck('getMembers', roomId)
+  updateMemberTotal(members)
 
   for (let i = 0; i < members.length; i++) {
     addMemberToDom(members[i])
