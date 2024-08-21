@@ -52,6 +52,7 @@ let joinRoomInit = async () => {
   socket.on('messageFromPeer', handleMessageFromPeer);
 
   getMembers();
+  addBotMessageToDom(`Welcome to the room, ${displayName} 👋 !`);
 };  
 
 let createPeerConnection = async (memberId) => {

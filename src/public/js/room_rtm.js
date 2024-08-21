@@ -4,6 +4,8 @@ let handleMemberJoinedChannel = async (member) => {
 
   let members = await socket.emitWithAck('getMembers', roomId)
   updateMemberTotal(members)
+
+  addBotMessageToDom(`${member.name} joined the room`)
 }
 
 let handleMemberLeftChannel = async (memberId) => {
@@ -25,7 +27,10 @@ let addMemberToDom = async (member) => {
 
 let removeMemberFromDom = async (memberId) => {
   let memberWrapper = document.getElementById(`member__${memberId}__wrapper`)
+  let name = memberWrapper.getElementsByClassName('member_name')[0].textContent
+
   memberWrapper.remove()
+  addBotMessageToDom(`${name} has left the room.`)
 }
 
 let updateMemberTotal = async (members) => {
@@ -58,6 +63,8 @@ let addChannelMessage = async (message) => {
 
   if (message.type === 'chat')
     addMessageToDom(message.name, message.message)
+  else if (message.type === 'bot')
+    addBotMessageToDom(message.message)
 }
 
 let addMessageToDom = async (name, message) => {
@@ -67,6 +74,23 @@ let addMessageToDom = async (name, message) => {
                       <div class="message__body">
                         <strong class="message__author">${name}</strong>
                         <p class="message__text">${message}</p>
+                      </div>
+                    </div>`
+
+  messagesWrapper.insertAdjacentHTML('beforeend', newMessage)
+
+  let lastMessage = document.querySelector('#messages .message__wrapper:last-child')
+  if (lastMessage)
+    lastMessage.scrollIntoView()
+}
+
+let addBotMessageToDom = async (message) => {
+  let messagesWrapper = document.getElementById('messages')
+
+  let newMessage = `<div class="message__wrapper">
+                      <div class="message__body__bot">
+                        <strong class="message__author__bot">🤖 Mumble Bot</strong>
+                        <p class="message__text__bot">${message}</p>
                       </div>
                     </div>`
 
