@@ -34,6 +34,10 @@ io.on('connection', (socket) => {
     io.to(roomId).emit('messageFromPeer', message, socket.id);
   });
 
+  socket.on('getMembers', (roomId, callback) => {
+    callback(roomMembers[roomId]);
+  });
+
   socket.on('leave', (roomId) => {
     if (!roomMembers[roomId]) {
       return;

@@ -44,12 +44,14 @@ let joinRoomInit = async () => {
     await joinStream();
     localInitialized = true;
   }
-  
+
   socket.emit('join', roomId);
 
-  socket.on('memberJoined', handleUserJoined);
+  socket.on('memberJoined', handleMemberJoined);
   socket.on('memberLeft', handleMemberLeft);
   socket.on('messageFromPeer', handleMessageFromPeer);
+
+  getMembers();
 };  
 
 let createPeerConnection = async (memberId) => {
@@ -114,9 +116,28 @@ let createOffer = async (memberId) => {
   socket.emit('messageFromPeer', JSON.stringify({'type': 'offer', 'offer': offer}), memberId);
 };
 
-let handleUserJoined = async (memberId) => {
-  console.log('User joined:', memberId);
+let handleMemberJoined = async (memberId) => {
+  console.log('Member joined:', memberId);
+  handleMemberJoinedChannel(memberId);
   createOffer(memberId);
+};
+
+let handleMemberLeft = async (memberId) => {
+  console.log('User left:', memberId);
+  handleMemberLeftChannel(memberId);
+  delete peerConnections[memberId];
+  delete remoteStreams[memberId];
+  document.getElementById(`user-container-${memberId}`).remove();
+
+  if (userIdDisplayFrame === `user-container-${memberId}`) {
+    displayFrame.style.display = null;
+
+    let videoFrames = document.getElementsByClassName('video__container');
+    for (let i = 0; videoFrames.length > i; i++) {
+      videoFrames[i].style.height = '300px';
+      videoFrames[i].style.width = '300px';
+    }
+  }
 };
 
 let handleMessageFromPeer = async (message, memberId) => {
@@ -165,23 +186,6 @@ let addAnswer = async (answer, memberId) => {
 let addIceCandidate = async (candidate, memberId) => {
   if (peerConnections[memberId]) {
     await peerConnections[memberId].addIceCandidate(candidate);
-  }
-};
-
-let handleMemberLeft = async (memberId) => {
-  console.log('User left:', memberId);
-  delete peerConnections[memberId];
-  delete remoteStreams[memberId];
-  document.getElementById(`user-container-${memberId}`).remove();
-
-  if (userIdDisplayFrame === `user-container-${memberId}`) {
-    displayFrame.style.display = null;
-
-    let videoFrames = document.getElementsByClassName('video__container');
-    for (let i = 0; videoFrames.length > i; i++) {
-      videoFrames[i].style.height = '300px';
-      videoFrames[i].style.width = '300px';
-    }
   }
 };
 
